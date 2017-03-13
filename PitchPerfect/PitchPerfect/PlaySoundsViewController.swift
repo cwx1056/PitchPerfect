@@ -68,10 +68,13 @@ class PlaySoundsViewController: UIViewController {
             playSound(reverb: true)
             break
         }
+        
+        configureUI(.playing)
     }
     
     @IBAction func stopButtonPressed(_ sender: UIButton) {
         stopAudio()
+        configureUI(.notPlaying)
     }
 
 }

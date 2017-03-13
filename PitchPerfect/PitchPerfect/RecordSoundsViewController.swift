@@ -64,18 +64,35 @@ class RecordSoundsViewController: UIViewController {
     // Setup and start recording
     fileprivate func startRecording() {
         let dirPath = NSSearchPathForDirectoriesInDomains(.documentationDirectory, .userDomainMask, true)[0] as String
-        let recordingName = "recordedVoice.wav"
+        let recordingName = "recordedVoice.acc"
         let pathArray = [dirPath, recordingName]
         let filePath = URL(string: pathArray.joined(separator: "/"))
+        let settings = [
+            AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
+            AVSampleRateKey: 44100,
+            AVNumberOfChannelsKey: 1,
+            AVEncoderAudioQualityKey: AVAudioQuality.high.rawValue
+        ]
+        
+        // Create dirctory if has not created
+        if !FileManager.default.fileExists(atPath: dirPath) {
+            do {
+                try FileManager.default.createDirectory(atPath: dirPath, withIntermediateDirectories: true, attributes: nil)
+            } catch {
+                print(error.localizedDescription)
+                return
+            }
+        }
         
         let session = AVAudioSession.sharedInstance()
         do {
             try session.setCategory(AVAudioSessionCategoryPlayAndRecord, with: .defaultToSpeaker)
             
-            try audioRecorder = AVAudioRecorder(url: filePath!, settings: [:])
+            audioRecorder = try AVAudioRecorder(url: filePath!, settings: settings)
             audioRecorder.delegate = self
             audioRecorder.isMeteringEnabled = true
-            audioRecorder.prepareToRecord()
+            let success = audioRecorder.prepareToRecord()
+            print("prepare to record success: \(success)")
             audioRecorder.record()
         } catch {
             print(error.localizedDescription)
@@ -90,7 +107,7 @@ class RecordSoundsViewController: UIViewController {
 }
 
 // MARK: -
-// MARK: AVAudioRecorderDelegate
+// MARK: RecordSoundsViewController - AVAudioRecorderDelegate
 
 extension RecordSoundsViewController: AVAudioRecorderDelegate {
     func audioRecorderDidFinishRecording(_ recorder: AVAudioRecorder, successfully flag: Bool) {
