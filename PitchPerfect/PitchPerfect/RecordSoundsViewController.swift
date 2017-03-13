@@ -69,13 +69,17 @@ class RecordSoundsViewController: UIViewController {
         let filePath = URL(string: pathArray.joined(separator: "/"))
         
         let session = AVAudioSession.sharedInstance()
-        try! session.setCategory(AVAudioSessionCategoryPlayAndRecord, with: .defaultToSpeaker)
-        
-        try! audioRecorder = AVAudioRecorder(url: filePath!, settings: [:])
-        audioRecorder.delegate = self
-        audioRecorder.isMeteringEnabled = true
-        audioRecorder.prepareToRecord()
-        audioRecorder.record()
+        do {
+            try session.setCategory(AVAudioSessionCategoryPlayAndRecord, with: .defaultToSpeaker)
+            
+            try audioRecorder = AVAudioRecorder(url: filePath!, settings: [:])
+            audioRecorder.delegate = self
+            audioRecorder.isMeteringEnabled = true
+            audioRecorder.prepareToRecord()
+            audioRecorder.record()
+        } catch {
+            print(error.localizedDescription)
+        }
     }
     
     fileprivate func stopRecording() {
