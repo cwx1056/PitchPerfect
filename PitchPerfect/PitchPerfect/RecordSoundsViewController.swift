@@ -64,13 +64,13 @@ class RecordSoundsViewController: UIViewController {
     // Setup and start recording
     fileprivate func startRecording() {
         let dirPath = NSSearchPathForDirectoriesInDomains(.documentationDirectory, .userDomainMask, true)[0] as String
-        let recordingName = "recordedVoice.acc"
+        let recordingName = "recordedVoice.wav"
         let pathArray = [dirPath, recordingName]
         let filePath = URL(string: pathArray.joined(separator: "/"))
-        let settings = [
-            AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
+        let settings: [String: Any] = [
+            AVFormatIDKey: kAudioFormatLinearPCM,
             AVSampleRateKey: 44100,
-            AVNumberOfChannelsKey: 1,
+            AVNumberOfChannelsKey: 2,
             AVEncoderAudioQualityKey: AVAudioQuality.high.rawValue
         ]
         
@@ -79,7 +79,7 @@ class RecordSoundsViewController: UIViewController {
             do {
                 try FileManager.default.createDirectory(atPath: dirPath, withIntermediateDirectories: true, attributes: nil)
             } catch {
-                print(error.localizedDescription)
+                showAlert("Recording Disabled", message: error.localizedDescription)
                 return
             }
         }
@@ -91,11 +91,10 @@ class RecordSoundsViewController: UIViewController {
             audioRecorder = try AVAudioRecorder(url: filePath!, settings: settings)
             audioRecorder.delegate = self
             audioRecorder.isMeteringEnabled = true
-            let success = audioRecorder.prepareToRecord()
-            print("prepare to record success: \(success)")
+            audioRecorder.prepareToRecord()
             audioRecorder.record()
         } catch {
-            print(error.localizedDescription)
+            showAlert("Recording Disabled", message: error.localizedDescription)
         }
     }
     
@@ -103,6 +102,12 @@ class RecordSoundsViewController: UIViewController {
         audioRecorder.stop()
         let audioSession = AVAudioSession.sharedInstance()
         try! audioSession.setActive(false)
+    }
+    
+    fileprivate func showAlert(_ title: String, message: String) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Dismiss", style: .default, handler: nil))
+        self.present(alert, animated: true, completion: nil)
     }
 }
 
@@ -114,7 +119,7 @@ extension RecordSoundsViewController: AVAudioRecorderDelegate {
         if flag {
             performSegue(withIdentifier: "stopRecording", sender: audioRecorder.url)
         } else {
-            print("recording was not successful")
+            showAlert("Recording Disabled", message: "Recording was not successful")
         }
     }
 }
