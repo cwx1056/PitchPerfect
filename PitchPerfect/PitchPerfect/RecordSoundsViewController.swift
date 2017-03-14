@@ -79,7 +79,7 @@ class RecordSoundsViewController: UIViewController {
             do {
                 try FileManager.default.createDirectory(atPath: dirPath, withIntermediateDirectories: true, attributes: nil)
             } catch {
-                showAlert("Recording Disabled", message: error.localizedDescription)
+                print(error.localizedDescription)
                 return
             }
         }
@@ -94,7 +94,7 @@ class RecordSoundsViewController: UIViewController {
             audioRecorder.prepareToRecord()
             audioRecorder.record()
         } catch {
-            showAlert("Recording Disabled", message: error.localizedDescription)
+            print(error.localizedDescription)
         }
     }
     
